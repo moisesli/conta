@@ -2,7 +2,6 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-
   css: ['~/assets/css/main.css'],
 
   vite: {
@@ -10,4 +9,6 @@ export default defineNuxtConfig({
       await import('@tailwindcss/vite').then(m => m.default()),
     ],
   },
+
+  modules: ['@nuxtjs/supabase'],
 })
