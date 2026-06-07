@@ -10,17 +10,12 @@
               <span class="text-white font-bold text-base">C</span>
             </div>
             <span class="font-semibold text-gray-900 text-xl">Conta</span>
+            <span v-if="periodo" class="ml-2 text-xs text-gray-400 font-medium">
+              {{ meses[periodo.mes - 1] }} {{ periodo.anio }}
+            </span>
           </div>
 
           <div class="flex items-center gap-3">
-            <!-- Botón Nuevo Período -->
-            <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-b from-gray-50 to-gray-100 text-gray-600 text-base font-medium rounded-lg border border-gray-200 hover:from-gray-100 hover:to-gray-200 hover:border-gray-300 transition-all cursor-pointer">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-              Nuevo Período
-            </button>
-
             <!-- Avatar / User menu -->
             <div class="relative" @click.stop>
               <button
@@ -43,19 +38,44 @@
                   <p class="text-xs text-gray-500 truncate">{{ user?.email }}</p>
                 </div>
                 <button
-                  @click="handleLogout"
-                  :disabled="loggingOut"
+                  @click="handleCerrarPeriodo"
+                  :disabled="cerrandoPeriodo"
                   class="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <svg v-if="loggingOut" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <svg v-if="cerrandoPeriodo" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                   </svg>
                   <svg v-else class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                   </svg>
-                  {{ loggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}
+                  {{ cerrandoPeriodo ? 'Cerrando...' : 'Cerrar Período' }}
                 </button>
+                <button
+                  @click="irAHistorial"
+                  class="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  Historial de Períodos
+                </button>
+                <div class="border-t border-gray-100 mt-1 pt-1">
+                  <button
+                    @click="handleLogout"
+                    :disabled="loggingOut"
+                    class="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <svg v-if="loggingOut" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    {{ loggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -79,6 +99,10 @@ const router = useRouter()
 
 const showUserMenu = ref(false)
 const loggingOut = ref(false)
+const cerrandoPeriodo = ref(false)
+const periodo = ref<{ id: string; mes: number; anio: number } | null>(null)
+
+const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre']
 
 const userInitial = computed(() => {
   const name = user.value?.user_metadata?.full_name || user.value?.email || 'U'
@@ -96,10 +120,37 @@ if (typeof document !== 'undefined') {
   document.addEventListener('click', onClickOutside)
 }
 
+// Obtener periodo actual al cargar
+onMounted(async () => {
+  try {
+    const res = await $fetch('/api/periodos')
+    periodo.value = res.periodo
+  } catch (e) {
+    console.error('Error al obtener periodo', e)
+  }
+})
+
 async function handleLogout() {
   loggingOut.value = true
   await supabase.auth.signOut()
   loggingOut.value = false
-  router.push('/login')
+  window.location.href = '/login'
+}
+
+async function handleCerrarPeriodo() {
+  cerrandoPeriodo.value = true
+  try {
+    const res = await $fetch('/api/periodos/cerrar', { method: 'POST' })
+    periodo.value = res.periodo
+  } catch (e) {
+    console.error('Error al cerrar periodo', e)
+  } finally {
+    cerrandoPeriodo.value = false
+  }
+}
+
+function irAHistorial() {
+  showUserMenu.value = false
+  router.push('/periodos')
 }
 </script>

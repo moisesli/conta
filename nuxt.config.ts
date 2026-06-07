@@ -19,4 +19,13 @@ export default defineNuxtConfig({
       exclude: ['/login'],
     },
   },
+
+  nitro: {
+    esbuild: {
+      options: {
+        tsconfigRaw: {},
+      },
+    },
+    envDir: '.',
+  },
 })
