@@ -20,11 +20,15 @@
             <div class="relative" @click.stop>
               <button
                 @click.stop="showUserMenu = !showUserMenu"
-                class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                class="flex items-center gap-3 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
               >
-                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                  {{ userInitial }}
+                <div class="flex flex-col items-end leading-tight">
+                  <span class="text-sm font-semibold text-gray-800">{{ user?.user_metadata?.full_name || 'Usuario' }}</span>
+                  <span class="text-xs text-gray-400">{{ user?.email }}</span>
                 </div>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
               </button>
 
               <!-- Dropdown -->
@@ -33,10 +37,6 @@
                 @click.stop
                 class="absolute right-0 mt-2 w-64 bg-white rounded-xl border-2 border-gray-200 shadow-xl z-20 overflow-hidden"
               >
-                <div class="px-4 py-3 border-b border-gray-100">
-                  <p class="text-sm font-semibold text-gray-900 truncate">{{ user?.user_metadata?.full_name || 'Usuario' }}</p>
-                  <p class="text-xs text-gray-500 truncate">{{ user?.email }}</p>
-                </div>
                 <button
                   @click="handleCerrarPeriodo"
                   :disabled="cerrandoPeriodo"
