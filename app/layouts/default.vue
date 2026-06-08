@@ -10,9 +10,6 @@
               <span class="text-white font-bold text-base">C</span>
             </div>
             <span class="font-semibold text-gray-900 text-xl">Conta</span>
-            <span v-if="periodo" class="ml-2 text-xs text-gray-400 font-medium">
-              {{ meses[periodo.mes - 1] }} {{ periodo.anio }}
-            </span>
           </div>
 
           <div class="flex items-center gap-3">
@@ -23,7 +20,9 @@
                 class="flex items-center gap-3 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
               >
                 <div class="flex flex-col items-end leading-tight">
-                  <span class="text-sm font-semibold text-gray-800">{{ user?.user_metadata?.full_name || 'Usuario' }}</span>
+                  <span v-if="periodo" class="text-xs text-blue-600 font-semibold">
+                    {{ meses[periodo.mes - 1] }} {{ periodo.anio }}
+                  </span>
                   <span class="text-xs text-gray-400">{{ user?.email }}</span>
                 </div>
                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
