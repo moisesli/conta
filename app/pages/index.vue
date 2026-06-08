@@ -99,8 +99,8 @@
     </div>
 
     <!-- Tabla -->
-    <div class="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
-      <div class="overflow-x-auto">
+    <div class="bg-white rounded-xl border-2 border-gray-200 overflow-visible">
+      <div class="min-w-0">
         <table class="w-full text-base">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-200">
