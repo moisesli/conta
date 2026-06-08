@@ -13,12 +13,89 @@
           class="w-full bg-white pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
         />
       </div>
-      <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-base font-medium rounded-lg hover:bg-emerald-700 transition-colors whitespace-nowrap cursor-pointer">
+      <button
+        @click="mostrarModal = true"
+        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-200 text-gray-700 text-base font-medium rounded-lg border border-gray-300 hover:bg-gray-300 hover:border-gray-400 transition-all cursor-pointer"
+      >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          <circle cx="12" cy="12" r="9" stroke-width="2"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8"/>
         </svg>
-        Nuevo Registro
+        Agregar
       </button>
+    </div>
+
+    <!-- Modal Agregar Registro -->
+    <div
+      v-if="mostrarModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      @click.self="cerrarModal"
+    >
+      <div class="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-md mx-4 p-6 relative">
+        <button
+          @click="cerrarModal"
+          class="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9" stroke-width="2"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9l-6 6m0-6l6 6"/>
+          </svg>
+        </button>
+        <h2 class="text-lg font-bold text-gray-900 mb-5">Nuevo Registro</h2>
+        <form @submit.prevent="guardarRegistro" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+            <input
+              v-model="form.descripcion"
+              type="text"
+              placeholder="Ej: Compra de materiales"
+              required
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-base outline-none focus:ring-1 focus:ring-gray-400 transition-all"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Monto</label>
+            <input
+              v-model="form.monto"
+              type="number"
+              step="0.01"
+              min="0.01"
+              placeholder="0.00"
+              required
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-base outline-none focus:ring-1 focus:ring-gray-400 transition-all"
+            />
+          </div>
+          <input v-model="form.fecha" type="hidden" />
+          <div class="flex gap-3 pt-2">
+            <button
+              type="button"
+              @click="cerrarModal"
+              class="flex-1 inline-flex items-center justify-center gap-2 py-3 border-2 border-gray-200 text-gray-600 font-semibold text-base rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" stroke-width="2"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9l-6 6m0-6l6 6"/>
+              </svg>
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              :disabled="guardando"
+              class="flex-1 inline-flex items-center justify-center gap-2 py-3 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-semibold text-base rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed"
+            >
+              <svg v-if="guardando" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
+              <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m-3 2a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              {{ guardando ? 'Guardando...' : 'Guardar' }}
+            </button>
+          </div>
+        </form>
+        <p v-if="errorMsg" class="mt-3 text-sm text-red-500 text-center">{{ errorMsg }}</p>
+      </div>
     </div>
 
     <!-- Tabla -->
@@ -37,7 +114,7 @@
           <tbody>
             <tr v-for="(item, index) in paginatedItems" :key="item.id" class="bg-white hover:bg-gray-50 transition-colors">
               <td class="pl-8 pr-4 py-2 whitespace-nowrap">
-                <span class="text-gray-900 font-mono">{{ item.id }}</span>
+                <span class="text-gray-900 font-mono">{{ item.id.slice(0, 8) }}</span>
               </td>
               <td class="px-4 py-2 text-gray-700">{{ item.descripcion }}</td>
               <td class="px-4 py-2 whitespace-nowrap">
@@ -47,7 +124,6 @@
                   </svg>
                   <div>
                     <div class="text-gray-700 font-medium">{{ item.fecha }}</div>
-                    <div class="text-gray-400 text-xs">{{ item.hora }}</div>
                   </div>
                 </div>
               </td>
@@ -151,14 +227,63 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const search = ref('')
 const currentPage = ref(1)
 const perPage = 10
-const openDropdownId = ref<number | null>(null)
+const openDropdownId = ref<string | null>(null)
+const records = ref<any[]>([])
+const totalMonto = ref(0)
 
-function toggleDropdown(id: number) {
+// Modal
+const mostrarModal = ref(false)
+const guardando = ref(false)
+const errorMsg = ref('')
+const form = ref({ descripcion: '', monto: '', fecha: new Date().toISOString().split('T')[0] })
+
+onMounted(async () => {
+  await cargarRegistros()
+})
+
+function cerrarModal() {
+  mostrarModal.value = false
+  errorMsg.value = ''
+  form.value = { descripcion: '', monto: '', fecha: new Date().toISOString().split('T')[0] }
+}
+
+async function guardarRegistro() {
+  guardando.value = true
+  errorMsg.value = ''
+  try {
+    await $fetch('/api/registros', {
+      method: 'POST',
+      body: {
+        descripcion: form.value.descripcion,
+        monto: parseFloat(form.value.monto),
+        fecha: form.value.fecha,
+      },
+    })
+    cerrarModal()
+    await cargarRegistros()
+  } catch (e: any) {
+    errorMsg.value = e?.data?.message || 'Error al guardar'
+  } finally {
+    guardando.value = false
+  }
+}
+
+async function cargarRegistros() {
+  try {
+    const data = await $fetch('/api/registros')
+    records.value = data.registros
+    totalMonto.value = data.total
+  } catch (e) {
+    console.error('Error al cargar registros', e)
+  }
+}
+
+function toggleDropdown(id: string) {
   openDropdownId.value = openDropdownId.value === id ? null : id
 }
 
@@ -166,37 +291,19 @@ function closeDropdown() {
   openDropdownId.value = null
 }
 
-// Cerrar dropdown al hacer clic fuera
 if (typeof document !== 'undefined') {
   document.addEventListener('click', closeDropdown)
 }
-
-const records = ref([
-  { id: 1, descripcion: 'Compra de materiales de oficina', fecha: '2026-06-01', hora: '09:15 AM', monto: 1250.00 },
-  { id: 2, descripcion: 'Pago de servicios de internet', fecha: '2026-06-02', hora: '10:30 AM', monto: 89.99 },
-  { id: 3, descripcion: 'Cena con cliente', fecha: '2026-06-03', hora: '08:45 PM', monto: 345.50 },
-  { id: 4, descripcion: 'Suscripción mensual SaaS', fecha: '2026-06-04', hora: '07:00 AM', monto: 29.99 },
-  { id: 5, descripcion: 'Gasolina vehículo empresa', fecha: '2026-06-05', hora: '12:20 PM', monto: 78.40 },
-  { id: 6, descripcion: 'Mantenimiento de equipo', fecha: '2026-06-06', hora: '03:10 PM', monto: 560.00 },
-  { id: 7, descripcion: 'Capacitación empleados', fecha: '2026-06-06', hora: '09:00 AM', monto: 2500.00 },
-  { id: 8, descripcion: 'Compra de licencias software', fecha: '2026-06-05', hora: '11:45 AM', monto: 999.00 },
-  { id: 9, descripcion: 'Servicio de mensajería', fecha: '2026-06-04', hora: '02:30 PM', monto: 45.00 },
-  { id: 10, descripcion: 'Renta de oficina junio', fecha: '2026-06-03', hora: '08:00 AM', monto: 1500.00 },
-  { id: 11, descripcion: 'Material de empaque', fecha: '2026-06-02', hora: '04:15 PM', monto: 234.75 },
-  { id: 12, descripcion: 'Pago nómina empleados', fecha: '2026-06-01', hora: '01:00 PM', monto: 8500.00 },
-])
 
 const filteredItems = computed(() => {
   if (!search.value) return records.value
   const q = search.value.toLowerCase()
   return records.value.filter(
-    r => r.id.toString().includes(q) || r.descripcion.toLowerCase().includes(q) || r.fecha.includes(q)
+    (r: any) => r.descripcion.toLowerCase().includes(q) || r.fecha.includes(q)
   )
 })
 
 const totalPages = computed(() => Math.ceil(filteredItems.value.length / perPage))
-
-const totalMonto = computed(() => records.value.reduce((sum, r) => sum + r.monto, 0))
 
 const paginatedItems = computed(() => {
   const start = (currentPage.value - 1) * perPage

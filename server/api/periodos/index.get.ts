@@ -1,22 +1,14 @@
-import { createClient } from '@supabase/supabase-js'
 import pg from 'pg'
+import { serverSupabaseUser } from '#supabase/server'
 
 const { Pool } = pg
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
-
-const supabaseUrl = process.env.NUXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY!
+const pool = new Pool({ connectionString: process.env.DIRECT_URL })
 
 export default defineEventHandler(async (event) => {
-  const cookie = getHeader(event, 'cookie') || ''
-  const match = cookie.match(/sb-.+-auth-token=([^;]+)/)
-  if (!match) throw createError({ statusCode: 401, message: 'No autenticado' })
-
-  const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } })
-  const { data: { user } } = await supabase.auth.getUser(match[1])
+  const user = await serverSupabaseUser(event)
   if (!user) throw createError({ statusCode: 401, message: 'No autenticado' })
 
-  const userId = user.id
+  const userId = user.sub
   const now = new Date()
   const mes = now.getMonth() + 1
   const anio = now.getFullYear()
