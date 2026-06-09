@@ -21,7 +21,7 @@
               >
                 <div class="flex flex-col items-end leading-tight">
                   <span v-if="periodo" class="text-xs text-blue-600 font-semibold">
-                    {{ meses[periodo.mes - 1] }} {{ periodo.anio }}
+                    {{ periodo.created_at ? new Date(periodo.created_at).getDate() : '' }} {{ meses[periodo.mes - 1] }} {{ periodo.anio }}
                   </span>
                   <span class="text-xs text-gray-400">{{ user?.email }}</span>
                 </div>
@@ -136,11 +136,14 @@ async function handleLogout() {
   window.location.href = '/login'
 }
 
+const cerrarKey = useState('periodo-cerrar-key', () => 0)
+
 async function handleCerrarPeriodo() {
   cerrandoPeriodo.value = true
   try {
     const res = await $fetch('/api/periodos/cerrar', { method: 'POST' })
     periodo.value = res.periodo
+    cerrarKey.value++
   } catch (e) {
     console.error('Error al cerrar periodo', e)
   } finally {

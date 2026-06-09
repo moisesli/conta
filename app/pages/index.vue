@@ -293,7 +293,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 const search = ref('')
 const currentPage = ref(1)
@@ -315,8 +315,14 @@ const errorDetalle = ref('')
 const detalleForm = ref({ id: '', descripcion: '', monto: '', fecha: '' })
 const detalleItemId = ref<string | null>(null)
 
+const cerrarKey = useState('periodo-cerrar-key', () => 0)
+
 onMounted(async () => {
   await cargarRegistros()
+})
+
+watch(cerrarKey, () => {
+  cargarRegistros()
 })
 
 function cerrarModal() {
